@@ -47,6 +47,7 @@ class JWTManager:
         user_id: str,
         user_email: str,
         roles: list[str],
+        first_name: Optional[str] = None,
         expires_delta: Optional[timedelta] = None
     ) -> str:
         """Create JWT access token."""
@@ -66,6 +67,10 @@ class JWTManager:
             "exp": expires,
             "type": "access"
         }
+        
+        # Add first_name to payload if provided
+        if first_name:
+            payload["first_name"] = first_name
         
         token = encode(
             payload,

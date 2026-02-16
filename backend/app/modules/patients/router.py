@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 @router.post("", response_model=PatientResponse, status_code=status.HTTP_201_CREATED)
 async def create_patient(
     patient_data: PatientCreate,
-    current_user: JWTClaims = Depends(require_roles(UserRole.CLINICIAN.value, UserRole.ADMIN.value)),
+    current_user: JWTClaims = Depends(require_roles(UserRole.DOCTOR.value, UserRole.SUPER_ADMIN.value)),
     db: AsyncSession = Depends(get_db)
 ):
     """Create new patient record."""
@@ -44,9 +44,9 @@ async def search_patients(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     current_user: JWTClaims = Depends(require_roles(
-        UserRole.CLINICIAN.value,
-        UserRole.NURSE.value,
-        UserRole.ADMIN.value
+        UserRole.DOCTOR.value,
+        UserRole.CLINICAL_ASSISTANT.value,
+        UserRole.SUPER_ADMIN.value
     )),
     db: AsyncSession = Depends(get_db)
 ):
@@ -74,8 +74,8 @@ async def get_patient(
         
         # Authorization check - patients can view own, clinicians can view assigned
         if (patient_id != current_user.user_id and
-            UserRole.CLINICIAN.value not in current_user.roles and
-            UserRole.ADMIN.value not in current_user.roles):
+            UserRole.DOCTOR.value not in current_user.roles and
+            UserRole.SUPER_ADMIN.value not in current_user.roles):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Cannot access this patient record"
@@ -128,9 +128,9 @@ async def complete_intake(
     patient_id: str,
     intake_data: PatientIntakeData,
     current_user: JWTClaims = Depends(require_roles(
-        UserRole.CLINICIAN.value,
-        UserRole.NURSE.value,
-        UserRole.ADMIN.value
+        UserRole.DOCTOR.value,
+        UserRole.CLINICAL_ASSISTANT.value,
+        UserRole.SUPER_ADMIN.value
     )),
     db: AsyncSession = Depends(get_db)
 ):
@@ -150,8 +150,8 @@ async def transition_workflow(
     patient_id: str,
     new_state: str = Query(),
     current_user: JWTClaims = Depends(require_roles(
-        UserRole.CLINICIAN.value,
-        UserRole.ADMIN.value
+        UserRole.DOCTOR.value,
+        UserRole.SUPER_ADMIN.value
     )),
     db: AsyncSession = Depends(get_db)
 ):
@@ -170,7 +170,7 @@ async def transition_workflow(
 async def assign_to_center(
     patient_id: str,
     center_id: str,
-    current_user: JWTClaims = Depends(require_roles(UserRole.ADMIN.value)),
+    current_user: JWTClaims = Depends(require_roles(UserRole.SUPER_ADMIN.value)),
     db: AsyncSession = Depends(get_db)
 ):
     """Assign patient to center (admin only)."""
@@ -189,8 +189,8 @@ async def assign_to_clinician(
     patient_id: str,
     clinician_id: str,
     current_user: JWTClaims = Depends(require_roles(
-        UserRole.CENTER_MANAGER.value,
-        UserRole.ADMIN.value
+        UserRole.CLINICAL_ADMIN.value,
+        UserRole.SUPER_ADMIN.value
     )),
     db: AsyncSession = Depends(get_db)
 ):
@@ -211,9 +211,9 @@ async def list_center_patients(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     current_user: JWTClaims = Depends(require_roles(
-        UserRole.CENTER_MANAGER.value,
-        UserRole.CLINICIAN.value,
-        UserRole.ADMIN.value
+        UserRole.CLINICAL_ADMIN.value,
+        UserRole.DOCTOR.value,
+        UserRole.SUPER_ADMIN.value
     )),
     db: AsyncSession = Depends(get_db)
 ):
@@ -234,8 +234,8 @@ async def list_clinician_patients(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     current_user: JWTClaims = Depends(require_roles(
-        UserRole.CLINICIAN.value,
-        UserRole.ADMIN.value
+        UserRole.DOCTOR.value,
+        UserRole.SUPER_ADMIN.value
     )),
     db: AsyncSession = Depends(get_db)
 ):

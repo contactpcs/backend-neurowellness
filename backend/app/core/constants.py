@@ -11,11 +11,13 @@ class Environment(str, Enum):
 
 class UserRole(str, Enum):
     """User roles for RBAC."""
-    ADMIN = "admin"
-    CLINICIAN = "clinician"
-    NURSE = "nurse"
+    SUPER_ADMIN = "super_admin"
+    PLATFORM_ADMIN = "platform_admin"
+    CLINICAL_ADMIN = "clinical_admin"
+    DOCTOR = "doctor"
+    CLINICAL_ASSISTANT = "clinical_assistant"
+    RECEPTIONIST = "receptionist"
     PATIENT = "patient"
-    CENTER_MANAGER = "center_manager"
 
 
 class AssessmentStatus(str, Enum):

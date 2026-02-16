@@ -76,7 +76,8 @@ class UserService:
         access_token = self.jwt_manager.create_access_token(
             user_id=user.id,
             user_email=user.email,
-            roles=[user.role]
+            roles=[user.role],
+            user_first_name=user.first_name
         )
         
         refresh_token = self.jwt_manager.create_refresh_token(user.id)

@@ -84,7 +84,7 @@ CREATE TABLE users (
     
     -- Authorization
     role VARCHAR(50) NOT NULL DEFAULT 'patient',
-    -- VALUES: 'admin', 'clinician', 'nurse', 'patient', 'center_manager'
+    -- VALUES: 'super_admin', 'platform_admin', 'clinical_admin', 'doctor', 'clinical_assistant', 'receptionist', 'patient'
     
     -- Contact
     phone VARCHAR(20),

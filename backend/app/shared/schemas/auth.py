@@ -17,6 +17,11 @@ class TokenResponse(BaseModel):
     refresh_token: str
     token_type: str = "bearer"
     expires_in: int
+    user: Optional[dict] = None  # Include user data with role after login
+    
+    class Config:
+        # Include None values in serialization so 'user' field is always present
+        exclude_none = False
 
 
 class RefreshTokenRequest(BaseModel):
@@ -30,6 +35,7 @@ class TokenPayload(BaseModel):
     
     user_id: str
     email: str
+    first_name: Optional[str] = None
     roles: list[str]
     token_type: str = "access"
 
@@ -39,4 +45,5 @@ class JWTClaims(BaseModel):
     
     user_id: str
     email: str
+    first_name: Optional[str] = None
     roles: list[str]

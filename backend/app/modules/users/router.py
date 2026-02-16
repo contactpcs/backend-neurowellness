@@ -18,6 +18,158 @@ jwt_manager = JWTManager()
 registered_users = {}
 
 
+@router.get("/debug/check-role/{user_email}")
+async def debug_check_user_role(user_email: str):
+    """Debug endpoint to check what role a user has in the database.
+    
+    USE THIS TO DEBUG: /api/v1/users/debug/check-role/doctor@example.com
+    """
+    try:
+        logger.info(f"=== DEBUG: Checking role for {user_email} ===")
+        
+        # Find user by email
+        user_response = await db_manager.query_table("users", filters={"email": user_email})
+        logger.info(f"Step 1 - User query response: {user_response}")
+        
+        if not user_response.get("data") or len(user_response["data"]) == 0:
+            return {
+                "status": "ERROR",
+                "step": "1_user_lookup",
+                "error": "User not found in users table",
+                "email": user_email,
+                "suggestion": "Register this user first"
+            }
+        
+        user = user_response["data"][0]
+        user_id = user.get("user_id") or user.get("id")
+        
+        if not user_id:
+            return {
+                "status": "ERROR",
+                "step": "1_user_lookup",
+                "error": "User record has no user_id or id field",
+                "available_fields": list(user.keys()),
+                "suggestion": "Database schema issue - check column names"
+            }
+        
+        logger.info(f"Step 2 - Found user_id: {user_id}")
+        
+        # Get user's role from user_roles table
+        user_roles_response = await db_manager.query_table("user_roles", filters={"user_id": user_id})
+        logger.info(f"Step 3 - user_roles query response: {user_roles_response}")
+        
+        if user_roles_response.get("error"):
+            return {
+                "status": "ERROR",
+                "step": "2_user_roles_lookup",
+                "error": "Database error querying user_roles",
+                "db_error": user_roles_response.get("error"),
+                "user_id": user_id,
+                "suggestion": "Check if user_roles table exists and has correct permissions"
+            }
+        
+        if not user_roles_response.get("data") or len(user_roles_response["data"]) == 0:
+            return {
+                "status": "ERROR",
+                "step": "2_user_roles_lookup",
+                "error": "No role assignment found in user_roles table!",
+                "user_id": user_id,
+                "email": user_email,
+                "suggestion": "User exists but has no entry in user_roles table. Re-register this user or manually insert into user_roles.",
+                "sql_check": f"SELECT * FROM user_roles WHERE user_id = '{user_id}'"
+            }
+        
+        user_role_record = user_roles_response["data"][0]
+        role_id = user_role_record.get("role_id") or user_role_record.get("roleId")
+        
+        if not role_id:
+            return {
+                "status": "ERROR",
+                "step": "2_user_roles_lookup",
+                "error": "user_roles record has no role_id field",
+                "available_fields": list(user_role_record.keys()),
+                "suggestion": "Database schema issue - check column names in user_roles table"
+            }
+        
+        logger.info(f"Step 4 - Found role_id: {role_id}")
+        
+        # Get role details
+        role_response = await db_manager.query_table("roles", filters={"role_id": role_id})
+        logger.info(f"Step 5 - roles query response: {role_response}")
+        
+        if role_response.get("error"):
+            return {
+                "status": "ERROR",
+                "step": "3_roles_lookup",
+                "error": "Database error querying roles",
+                "db_error": role_response.get("error"),
+                "role_id": role_id,
+                "suggestion": "Check if roles table exists and has correct permissions"
+            }
+        
+        if not role_response.get("data") or len(role_response["data"]) == 0:
+            return {
+                "status": "ERROR",
+                "step": "3_roles_lookup",
+                "error": "Role ID exists in user_roles but not found in roles table!",
+                "user_id": user_id,
+                "email": user_email,
+                "role_id": role_id,
+                "suggestion": "Database integrity issue - the role_id in user_roles doesn't match any role in roles table",
+                "sql_check": f"SELECT * FROM roles WHERE role_id = '{role_id}'"
+            }
+        
+        role = role_response["data"][0]
+        role_name = role.get("role_name") or role.get("roleName")
+        
+        if not role_name:
+            return {
+                "status": "ERROR",
+                "step": "3_roles_lookup",
+                "error": "Role record has no role_name field",
+                "available_fields": list(role.keys()),
+                "suggestion": "Database schema issue - check column names in roles table"
+            }
+        
+        # Map to internal role - matches actual Supabase database role names
+        role_name_reverse_map = {
+            "PATIENT": "patient",
+            "DOCTOR": "doctor",
+            "CLINICAL_ASSISTANT": "clinical_assistant",
+            "SUPER_ADMIN": "super_admin",
+            "PLATFORM_ADMIN": "platform_admin",
+            "CLINICAL_ADMIN": "clinical_admin",
+            "RECEPTIONIST": "receptionist",
+        }
+        internal_role = role_name_reverse_map.get(role_name, "patient")
+        
+        return {
+            "✓✓✓ status": "SUCCESS",
+            "email": user_email,
+            "user_id": user_id,
+            "role_id": role_id,
+            "role_in_database": role_name,
+            "role_in_jwt_token": internal_role,
+            "role_description": role.get("description"),
+            "assigned_at": user_role_record.get("assigned_at"),
+            "full_chain": {
+                "1_users_table": {"user_id": user_id, "email": user_email},
+                "2_user_roles_table": {"user_id": user_id, "role_id": role_id},
+                "3_roles_table": {"role_id": role_id, "role_name": role_name}
+            },
+            "message": f"This user will login with role: '{internal_role}'"
+        }
+        
+    except Exception as e:
+        logger.error(f"Debug check failed: {str(e)}", exc_info=True)
+        return {
+            "status": "EXCEPTION",
+            "error": str(e),
+            "email": user_email,
+            "suggestion": "Check backend logs for full error details"
+        }
+
+
 @router.get("/roles")
 async def get_all_roles():
     """Get all available roles from roles table.
@@ -127,12 +279,15 @@ async def register_user(user_data: UserCreate):
         logger.info(f"User successfully inserted to Supabase: {user_data.email}")
         
         # NOW assign role - map UserRole enum to Supabase role table names
+        # Updated to match actual Supabase database role names
         role_name_map = {
-            "patient": "PATIENT_PORTAL",
-            "clinician": "DOCTOR_UI",
-            "nurse": "CLINIC_ASSISTANT",
-            "admin": "SUPER_ADMIN",
-            "center_manager": "CLINICIAN_ADMIN",
+            "patient": "PATIENT",
+            "doctor": "DOCTOR",
+            "clinical_assistant": "CLINICAL_ASSISTANT",
+            "super_admin": "SUPER_ADMIN",
+            "platform_admin": "PLATFORM_ADMIN",
+            "clinical_admin": "CLINICAL_ADMIN",
+            "receptionist": "RECEPTIONIST",
         }
         
         # Get the role from user data, default to patient if not specified
@@ -151,13 +306,13 @@ async def register_user(user_data: UserCreate):
             logger.info(f"Found role_id: {role_id} for role: {role_name}")
         else:
             # If role not found, try to get patient role as default
-            logger.warning(f"Role not found: {role_name}, trying default PATIENT_PORTAL")
-            patient_response = await db_manager.query_table("roles", filters={"role_name": "PATIENT_PORTAL"})
+            logger.warning(f"Role not found: {role_name}, trying default PATIENT")
+            patient_response = await db_manager.query_table("roles", filters={"role_name": "PATIENT"})
             if patient_response.get("data") and len(patient_response["data"]) > 0:
                 role_id = patient_response["data"][0]["role_id"]
                 logger.info(f"Using default patient role_id: {role_id}")
             else:
-                logger.error("Could not find PATIENT_PORTAL role in database")
+                logger.error("Could not find PATIENT role in database")
         
         # Insert into user_roles junction table
         if role_id:
@@ -263,9 +418,9 @@ async def test_insert():
             "error": user_insert_result.get("error")
         }
     
-    # Now get PATIENT_PORTAL role and assign it
-    logger.info("Querying for PATIENT_PORTAL role...")
-    role_query_result = await db_manager.query_table("roles", filters={"role_name": "PATIENT_PORTAL"})
+    # Now get PATIENT role and assign it
+    logger.info("Querying for PATIENT role...")
+    role_query_result = await db_manager.query_table("roles", filters={"role_name": "PATIENT"})
     logger.info(f"Role query result: {role_query_result}")
     
     role_id = None
@@ -296,7 +451,7 @@ async def test_insert():
             "success": False,
             "user_result": user_insert_result,
             "role_result": None,
-            "error": "PATIENT_PORTAL role not found in roles table"
+            "error": "PATIENT role not found in roles table"
         }
 
 
@@ -342,46 +497,96 @@ async def login(credentials: LoginRequest):
                     detail="Invalid email or password"
                 )
         
-        # Get user info
-        user_id = user_data.get("user_id", str(uuid.uuid4()))
+        # Get user info - handle different possible field names
+        user_id = user_data.get("user_id") or user_data.get("id")
+        if not user_id:
+            logger.error(f"✗ No user_id or id field found in user data: {user_data.keys()}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="User ID not found in database"
+            )
+        
+        logger.info(f"=== ROLE LOOKUP START for user_id: {user_id} ===")
         
         # Get user's role from user_roles table
         user_role = "patient"  # default role
         try:
+            logger.info(f"Step 1: Querying user_roles table with user_id: {user_id}")
             user_roles_response = await db_manager.query_table("user_roles", filters={"user_id": user_id})
-            logger.info(f"User roles response: {user_roles_response}")
+            logger.info(f"Step 1 Response: {user_roles_response}")
+            
+            if user_roles_response.get("error"):
+                logger.error(f"✗ Database error querying user_roles: {user_roles_response.get('error')}")
+                raise Exception(f"Database error: {user_roles_response.get('error')}")
             
             if user_roles_response.get("data") and len(user_roles_response["data"]) > 0:
-                role_id = user_roles_response["data"][0]["role_id"]
-                logger.info(f"Found role_id for user: {role_id}")
+                user_role_record = user_roles_response["data"][0]
+                logger.info(f"Step 2: Found user_role record: {user_role_record}")
+                
+                # Handle different possible field names for role_id
+                role_id = user_role_record.get("role_id") or user_role_record.get("roleId")
+                if not role_id:
+                    logger.error(f"✗ No role_id field in user_role record. Available fields: {user_role_record.keys()}")
+                    raise Exception("role_id field not found in user_roles table")
+                
+                logger.info(f"Step 3: Found role_id: {role_id}, now querying roles table")
                 
                 # Get role details from roles table
                 role_response = await db_manager.query_table("roles", filters={"role_id": role_id})
-                logger.info(f"Role response: {role_response}")
+                logger.info(f"Step 3 Response: {role_response}")
+                
+                if role_response.get("error"):
+                    logger.error(f"✗ Database error querying roles: {role_response.get('error')}")
+                    raise Exception(f"Database error: {role_response.get('error')}")
                 
                 if role_response.get("data") and len(role_response["data"]) > 0:
-                    role_name = role_response["data"][0]["role_name"]
+                    role_record = role_response["data"][0]
+                    logger.info(f"Step 4: Found role record: {role_record}")
+                    
+                    # Handle different possible field names
+                    role_name = role_record.get("role_name") or role_record.get("roleName")
+                    if not role_name:
+                        logger.error(f"✗ No role_name field in role record. Available fields: {role_record.keys()}")
+                        raise Exception("role_name field not found in roles table")
+                    
+                    logger.info(f"Step 5: Role name from DB: {role_name}")
                     
                     # Map Supabase role name back to our role enum
+                    # Updated to match actual Supabase database role names
                     role_name_reverse_map = {
-                        "PATIENT_PORTAL": "patient",
-                        "DOCTOR_UI": "clinician",
-                        "CLINIC_ASSISTANT": "nurse",
-                        "SUPER_ADMIN": "admin",
-                        "PLATFORM_ADMIN": "admin",
-                        "CLINICIAN_ADMIN": "center_manager",
-                        "RECEPTIONIST": "patient",
+                        "PATIENT": "patient",
+                        "DOCTOR": "doctor",
+                        "CLINICAL_ASSISTANT": "clinical_assistant",
+                        "SUPER_ADMIN": "super_admin",
+                        "PLATFORM_ADMIN": "platform_admin",
+                        "CLINICAL_ADMIN": "clinical_admin",
+                        "RECEPTIONIST": "receptionist",
                     }
                     user_role = role_name_reverse_map.get(role_name, "patient")
-                    logger.info(f"User role: {user_role} (from {role_name})")
+                    logger.info(f"✓✓✓ SUCCESS: User role resolved: {user_role} (from DB role: {role_name})")
+                else:
+                    logger.error(f"✗ NO ROLE FOUND in roles table for role_id: {role_id}")
+                    logger.error(f"   This means the role_id in user_roles doesn't match any role in roles table")
+            else:
+                logger.error(f"✗ NO USER_ROLE RECORD found in user_roles table for user_id: {user_id}")
+                logger.error(f"   The user exists but has no entry in user_roles table!")
+                logger.error(f"   This user was likely registered incorrectly - user will default to 'patient'")
         except Exception as e:
-            logger.warning(f"Failed to get user role: {str(e)}, using default 'patient'")
+            logger.error(f"✗✗✗ EXCEPTION while fetching user role: {str(e)}", exc_info=True)
+            logger.error(f"   User will default to 'patient' role - CHECK THE LOGS ABOVE!")
+        
+        logger.info(f"=== ROLE LOOKUP END: Final role = {user_role} ===")
+
+        # Extract first_name from user_data
+        first_name = user_data.get("first_name") or user_data.get("firstName") or ""
+        logger.info(f"User first_name: {first_name}")
         
         # Create JWT tokens
         access_token = jwt_manager.create_access_token(
             user_id=user_id,
             user_email=credentials.email,
-            roles=[user_role]
+            roles=[user_role],
+            first_name=first_name
         )
         
         refresh_token = jwt_manager.create_refresh_token(user_id)

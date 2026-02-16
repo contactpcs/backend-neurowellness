@@ -337,8 +337,8 @@ provider = LLMFactory.create_provider("openai", api_key="...")
 
 ### Authorization
 - **RBAC**: Role-based access control
-- **Roles**: admin, clinician, nurse, patient, center_manager
-- **Decorators**: `@require_roles("admin", "clinician")`
+- **Roles**: super_admin, platform_admin, clinical_admin, doctor, clinical_assistant, receptionist, patient
+- **Decorators**: `@require_roles("super_admin", "doctor")`
 
 ### Data Protection
 - **Passwords**: bcrypt hashing (passlib)
