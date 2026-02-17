@@ -47,7 +47,7 @@ class JWTManager:
         user_id: str,
         user_email: str,
         roles: list[str],
-        first_name: Optional[str] = None,
+        user_first_name: Optional[str] = None,
         expires_delta: Optional[timedelta] = None
     ) -> str:
         """Create JWT access token."""
@@ -62,15 +62,12 @@ class JWTManager:
         payload = {
             "sub": user_id,
             "email": user_email,
+            "first_name": user_first_name,
             "roles": roles,
             "iat": now,
             "exp": expires,
             "type": "access"
         }
-        
-        # Add first_name to payload if provided
-        if first_name:
-            payload["first_name"] = first_name
         
         token = encode(
             payload,
@@ -113,6 +110,7 @@ class JWTManager:
             
             user_id: str = payload.get("sub")
             email: str = payload.get("email")
+            first_name: Optional[str] = payload.get("first_name")
             roles: list[str] = payload.get("roles", [])
             token_type: str = payload.get("type", "access")
             
@@ -122,6 +120,7 @@ class JWTManager:
             return TokenPayload(
                 user_id=user_id,
                 email=email,
+                first_name=first_name,
                 roles=roles,
                 token_type=token_type
             )
@@ -147,7 +146,8 @@ class JWTManager:
         return self.create_access_token(
             user_id=payload.user_id,
             user_email=payload.email,
-            roles=user_roles or []
+            roles=user_roles or [],
+            user_first_name=payload.first_name
         )
 
 
@@ -169,6 +169,7 @@ class JWTBearer:
             return JWTClaims(
                 user_id=payload.user_id,
                 email=payload.email,
+                first_name=payload.first_name,
                 roles=payload.roles
             )
         except HTTPException:

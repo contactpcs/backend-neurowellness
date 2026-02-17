@@ -1,12 +1,13 @@
 """User routes - HTTP layer using Supabase client."""
 import logging
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from datetime import datetime, timezone
 import uuid
 
 from app.core.database import db_manager
 from app.core.security import PasswordManager, JWTManager
-from app.shared.schemas.auth import LoginRequest, TokenResponse
+from app.shared.schemas.auth import LoginRequest, TokenResponse, JWTClaims
+from app.core.dependencies import get_current_user
 from .schemas import UserCreate, UserResponse
 
 logger = logging.getLogger(__name__)
@@ -455,6 +456,32 @@ async def test_insert():
         }
 
 
+@router.get("/profile", response_model=UserResponse)
+async def get_profile(current_user: JWTClaims = Depends(get_current_user)):
+    """Return basic profile for the currently authenticated user.
+
+    This endpoint returns the user's profile information derived from the JWT claims.
+    """
+    try:
+        now = datetime.now(timezone.utc)
+        role = current_user.roles[0] if current_user.roles else "patient"
+        return UserResponse(
+            id=current_user.user_id,
+            email=current_user.email,
+            first_name=current_user.first_name or "",
+            last_name="",
+            phone=None,
+            role=role,
+            is_active=True,
+            verified_email=False,
+            created_at=now,
+            updated_at=now,
+        )
+    except Exception as e:
+        logger.error(f"Failed to build profile response: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to fetch profile")
+
+
 @router.post("/login", response_model=TokenResponse)
 async def login(credentials: LoginRequest):
     """Login user with JWT token generation.
@@ -577,27 +604,40 @@ async def login(credentials: LoginRequest):
         
         logger.info(f"=== ROLE LOOKUP END: Final role = {user_role} ===")
 
-        # Extract first_name from user_data
-        first_name = user_data.get("first_name") or user_data.get("firstName") or ""
-        logger.info(f"User first_name: {first_name}")
         
         # Create JWT tokens
         access_token = jwt_manager.create_access_token(
             user_id=user_id,
             user_email=credentials.email,
             roles=[user_role],
-            first_name=first_name
+            user_first_name=user_data.get("first_name") if isinstance(user_data, dict) else None,
         )
         
         refresh_token = jwt_manager.create_refresh_token(user_id)
         
-        logger.info(f"User login successful: {credentials.email}")
+        # Prepare user data for response
+        user_response_data = {
+            "user_id": user_id,
+            "email": user_data.get("email"),
+            "first_name": user_data.get("first_name"),
+            "last_name": user_data.get("last_name"),
+            "role": user_role,
+            "is_active": user_data.get("is_active", True),
+        }
         
-        return TokenResponse(
+        logger.info(f"User login successful: {credentials.email}")
+        logger.info(f"User response data: {user_response_data}")
+        
+        response = TokenResponse(
             access_token=access_token,
             refresh_token=refresh_token,
-            expires_in=3600
+            expires_in=3600,
+            user=user_response_data
         )
+        
+        logger.info(f"TokenResponse dict: {response.model_dump()}")
+        
+        return response
     except HTTPException:
         raise
     except Exception as e:
@@ -606,6 +646,3 @@ async def login(credentials: LoginRequest):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Login failed"
         )
-
-
-

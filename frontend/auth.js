@@ -3,14 +3,15 @@ const API_BASE_URL = 'http://localhost:8000/api/v1';
 const USERS_ENDPOINT = '/users';
 
 // Role mapping from database role names to enum values for backend
+// Updated to match actual Supabase database role names
 const roleMapping = {
-    'PATIENT_PORTAL': 'patient',
-    'DOCTOR_UI': 'clinician',
-    'CLINIC_ASSISTANT': 'nurse',
-    'SUPER_ADMIN': 'admin',
-    'PLATFORM_ADMIN': 'admin',
-    'CLINICIAN_ADMIN': 'center_manager',
-    'RECEPTIONIST': 'patient',  // map receptionist to patient for now
+    'PATIENT': 'patient',
+    'DOCTOR': 'doctor',
+    'CLINICAL_ASSISTANT': 'clinical_assistant',
+    'SUPER_ADMIN': 'super_admin',
+    'PLATFORM_ADMIN': 'platform_admin',
+    'CLINICAL_ADMIN': 'clinical_admin',
+    'RECEPTIONIST': 'receptionist',
 };
 
 // DOM Elements
