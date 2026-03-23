@@ -1,5 +1,5 @@
-"""Getting started guide for Sozo backend development."""
-# Getting Started with Sozo
+"""Getting started guide for Neurowellness backend development."""
+# Getting Started with Neurowellness
 
 ## Quick Start (Docker Compose)
 
@@ -11,7 +11,7 @@
 ```bash
 # Clone repository
 git clone <repository-url>
-cd Sozo
+cd Neurowellness
 
 # Create environment file
 cp .env.example .env
@@ -437,7 +437,7 @@ docker-compose logs -f api | jq '. | select(.action == "CREATE")'
 Server: localhost
 User: sa
 Password: (from .env)
-Database: sozo_dev
+Database: neurowellness_dev
 
 # Or use command line
 docker-compose exec mssql /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourPassword123!
@@ -484,7 +484,7 @@ mypy app/
 ### Issue: `ModuleNotFoundError: No module named 'app'`
 **Solution**: Run from project root, ensure PYTHONPATH includes current directory
 ```bash
-cd /path/to/Sozo
+cd /path/to/Neurowellness
 python -m uvicorn app.main:app --reload
 ```
 
@@ -536,4 +536,4 @@ For questions:
 2. Check ARCHITECTURE.md
 3. Review similar modules for patterns
 4. Read code comments
-5. Contact: dev@sozo.health
+5. Contact: dev@neurowellness.health

@@ -1,6 +1,6 @@
-# Sozo Frontend - Login & Registration Testing
+# Neurowellness Frontend - Login & Registration Testing
 
-A simple, standalone HTML/CSS/JavaScript frontend to test the Sozo backend login and registration endpoints.
+A simple, standalone HTML/CSS/JavaScript frontend to test the Neurowellness backend login and registration endpoints.
 
 ## Features
 

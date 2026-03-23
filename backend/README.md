@@ -1,10 +1,10 @@
-# Sozo Healthcare Platform API
+# Neurowellness Healthcare Platform API
 
 Production-grade healthcare SaaS backend built with clean architecture principles, domain-driven design, and modular monolith structure.
 
 ## Overview
 
-Sozo is a comprehensive healthcare platform designed to handle:
+Neurowellness is a comprehensive healthcare platform designed to handle:
 - Patient intake and registration
 - Clinical and psychosocial assessments
 - PRS (Patient Risk Score) computation
@@ -57,7 +57,7 @@ Pure business logic (PRS Scoring, Routing, Workflow) is completely isolated:
 ## Project Structure
 
 ```
-Sozo/
+Neurowellness/
 ├── app/
 │   ├── core/                          # Cross-cutting concerns
 │   │   ├── config.py                  # Environment-based configuration
@@ -412,9 +412,9 @@ uvicorn app.main:app --reload
 ### Azure App Service
 ```dockerfile
 # Single container deployment
-docker build -t sozo:latest .
-az acr build --registry <registry> --image sozo:latest .
-az containerapp create --resource-group <rg> --image sozo:latest
+docker build -t neurowellness:latest .
+az acr build --registry <registry> --image neurowellness:latest .
+az containerapp create --resource-group <rg> --image neurowellness:latest
 ```
 
 ### Health Checks
@@ -535,13 +535,13 @@ uvicorn app.main:app --reload
 ### Docker Deployment
 ```bash
 # Build image
-docker build -t sozo:latest .
+docker build -t neurowellness:latest .
 
 # Run container
 docker run -p 8000:8000 \
   -e DATABASE_HOST=<host> \
   -e DATABASE_PASSWORD=<password> \
-  sozo:latest
+  neurowellness:latest
 
 # Or with Docker Compose
 docker-compose up
@@ -586,8 +586,8 @@ docker-compose up
 
 ## License
 
-Proprietary - Sozo Healthcare Platform
+Proprietary - Neurowellness Healthcare Platform
 
 ## Support
 
-For questions or issues, contact: support@sozo.health
+For questions or issues, contact: support@neurowellness.health

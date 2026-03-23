@@ -2,7 +2,7 @@
 
 ## 🎯 What Was Accomplished
 
-Successfully integrated the **Supabase Python client** into your Sozo Healthcare Platform backend, alongside the existing SQLAlchemy setup.
+Successfully integrated the **Supabase Python client** into your Neurowellness Healthcare Platform backend, alongside the existing SQLAlchemy setup.
 
 ---
 
@@ -70,7 +70,7 @@ GET /
 **Now includes Supabase info:**
 ```json
 {
-  "application": "Sozo",
+  "application": "Neurowellness",
   "version": "0.1.0",
   "supabase": {
     "status_endpoint": "/api/v1/supabase/status",
@@ -144,7 +144,7 @@ async def simple_crud():
 
 ### **Server Startup:**
 ```bash
-cd C:\Users\mohan\OneDrive\Desktop\Sozo
+cd C:\Users\mohan\OneDrive\Desktop\Neurowellness
 .\venv\Scripts\uvicorn app.main:app --host 127.0.0.1 --port 8001
 ```
 

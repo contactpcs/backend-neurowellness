@@ -1318,7 +1318,7 @@ The team of 3 developers splits as follows:
 
 1. **Project setup**
    - Scaffold new Next.js 14 app (`prs-frontend-app-new/`)
-   - Copy/adapt auth, Redux store, API client from `frontend-sozo`
+   - Copy/adapt auth, Redux store, API client from `frontend-neurowellness`
    - Tailwind config, brand tokens, NeuroWellness PRS theme
 
 2. **Admin Portal** (`/admin/*`)

@@ -1,4 +1,4 @@
-"""Sozo Healthcare Platform API - Main Application."""
+"""Neurowellness Healthcare Platform API - Main Application."""
 import logging
 from contextlib import asynccontextmanager
 
@@ -11,7 +11,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.core.config import get_settings
 from app.core.database import db_manager
 from app.core.logging import setup_logging
-from app.shared.exceptions import SozoException
+from app.shared.exceptions import NeurowellnessException
 from app.modules.users.router import router as users_router, register_user, login as users_login
 from app.shared.schemas.auth import LoginRequest, TokenResponse
 from app.modules.users.schemas import UserCreate, UserResponse
@@ -31,13 +31,13 @@ settings = get_settings()
 async def lifespan(app: FastAPI):
     """Application lifespan."""
     # Startup
-    logger.info(f"Starting Sozo application in {settings.environment.value} environment")
+    logger.info(f"Starting Neurowellness application in {settings.environment.value} environment")
     db_manager.initialize()
     
     yield
     
     # Shutdown
-    logger.info("Shutting down Sozo application")
+    logger.info("Shutting down Neurowellness application")
     await db_manager.close()
 
 
@@ -63,7 +63,7 @@ app.add_middleware(
         "localhost",
         "127.0.0.1",
         "*.azurewebsites.net",
-        "*.sozo.health",
+        "*.neurowellness.health",
     ] if not settings.is_development else ["*"]
 )
 
@@ -81,8 +81,8 @@ app.add_middleware(
 # EXCEPTION HANDLERS
 # ============================================================================
 
-@app.exception_handler(SozoException)
-async def sozo_exception_handler(request, exc: SozoException):
+@app.exception_handler(NeurowellnessException)
+async def neurowellness_exception_handler(request, exc: NeurowellnessException):
     """Handle application exceptions."""
     return JSONResponse(
         status_code=exc.status_code,

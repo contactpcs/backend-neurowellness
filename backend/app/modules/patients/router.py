@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.core.dependencies import get_current_user, require_roles
 from app.core.constants import UserRole
-from app.shared.exceptions import SozoException
+from app.shared.exceptions import NeurowellnessException
 from app.shared.schemas.auth import JWTClaims
 from .schemas import (
     PatientCreate,
@@ -31,7 +31,7 @@ async def create_patient(
     try:
         service = PatientService(db)
         return await service.create_patient(patient_data)
-    except SozoException as e:
+    except NeurowellnessException as e:
         raise HTTPException(
             status_code=e.status_code,
             detail={"error_code": e.error_code, "message": e.message}
@@ -54,7 +54,7 @@ async def search_patients(
     try:
         service = PatientService(db)
         return await service.search_patients(q, page, page_size)
-    except SozoException as e:
+    except NeurowellnessException as e:
         raise HTTPException(
             status_code=e.status_code,
             detail=e.message
@@ -82,7 +82,7 @@ async def get_patient(
             )
         
         return patient
-    except SozoException as e:
+    except NeurowellnessException as e:
         raise HTTPException(
             status_code=e.status_code,
             detail=e.message
@@ -98,7 +98,7 @@ async def get_my_profile(
     try:
         service = PatientService(db)
         return await service.get_patient_by_user(current_user.user_id)
-    except SozoException as e:
+    except NeurowellnessException as e:
         raise HTTPException(
             status_code=e.status_code,
             detail=e.message
@@ -116,7 +116,7 @@ async def update_patient(
     try:
         service = PatientService(db)
         return await service.update_patient(patient_id, update_data)
-    except SozoException as e:
+    except NeurowellnessException as e:
         raise HTTPException(
             status_code=e.status_code,
             detail=e.message
@@ -138,7 +138,7 @@ async def complete_intake(
     try:
         service = PatientService(db)
         return await service.complete_intake(patient_id, intake_data)
-    except SozoException as e:
+    except NeurowellnessException as e:
         raise HTTPException(
             status_code=e.status_code,
             detail={"error_code": e.error_code, "message": e.message}
@@ -159,7 +159,7 @@ async def transition_workflow(
     try:
         service = PatientService(db)
         return await service.transition_workflow_state(patient_id, new_state)
-    except SozoException as e:
+    except NeurowellnessException as e:
         raise HTTPException(
             status_code=e.status_code,
             detail={"error_code": e.error_code, "message": e.message}
@@ -177,7 +177,7 @@ async def assign_to_center(
     try:
         service = PatientService(db)
         return await service.assign_to_center(patient_id, center_id)
-    except SozoException as e:
+    except NeurowellnessException as e:
         raise HTTPException(
             status_code=e.status_code,
             detail=e.message
@@ -198,7 +198,7 @@ async def assign_to_clinician(
     try:
         service = PatientService(db)
         return await service.assign_to_clinician(patient_id, clinician_id)
-    except SozoException as e:
+    except NeurowellnessException as e:
         raise HTTPException(
             status_code=e.status_code,
             detail=e.message
@@ -221,7 +221,7 @@ async def list_center_patients(
     try:
         service = PatientService(db)
         return await service.list_patients_by_center(center_id, page, page_size)
-    except SozoException as e:
+    except NeurowellnessException as e:
         raise HTTPException(
             status_code=e.status_code,
             detail=e.message
@@ -243,7 +243,7 @@ async def list_clinician_patients(
     try:
         service = PatientService(db)
         return await service.list_patients_by_clinician(clinician_id, page, page_size)
-    except SozoException as e:
+    except NeurowellnessException as e:
         raise HTTPException(
             status_code=e.status_code,
             detail=e.message

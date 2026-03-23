@@ -78,14 +78,14 @@ class Settings(BaseSettings):
     """Main application settings."""
     
     # Application
-    app_name: str = Field(default="Sozo")
+    app_name: str = Field(default="Neurowellness")
     app_version: str = Field(default="0.1.0")
     environment: Environment = Field(default=Environment.DEV)
     debug: bool = Field(default=False)
     
     # API
     api_v1_prefix: str = Field(default="/api/v1")
-    api_title: str = Field(default="Sozo Healthcare Platform API")
+    api_title: str = Field(default="Neurowellness Healthcare Platform API")
     
     # CORS
     cors_origins: list[str] = Field(default=["http://localhost:3000", "http://localhost:8000", "http://localhost:8080", "http://localhost:5173"])

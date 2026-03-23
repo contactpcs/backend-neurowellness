@@ -2,7 +2,7 @@
 from typing import Any, Optional
 
 
-class SozoException(Exception):
+class NeurowellnessException(Exception):
     """Base application exception."""
     
     def __init__(
@@ -19,7 +19,7 @@ class SozoException(Exception):
         super().__init__(self.message)
 
 
-class ValidationError(SozoException):
+class ValidationError(NeurowellnessException):
     """Validation error - 400."""
     
     def __init__(self, message: str, details: Optional[dict] = None):
@@ -31,7 +31,7 @@ class ValidationError(SozoException):
         )
 
 
-class AuthenticationError(SozoException):
+class AuthenticationError(NeurowellnessException):
     """Authentication error - 401."""
     
     def __init__(self, message: str = "Authentication failed"):
@@ -42,7 +42,7 @@ class AuthenticationError(SozoException):
         )
 
 
-class AuthorizationError(SozoException):
+class AuthorizationError(NeurowellnessException):
     """Authorization error - 403."""
     
     def __init__(self, message: str = "Insufficient permissions"):
@@ -53,7 +53,7 @@ class AuthorizationError(SozoException):
         )
 
 
-class NotFoundError(SozoException):
+class NotFoundError(NeurowellnessException):
     """Resource not found - 404."""
     
     def __init__(self, resource: str, identifier: str = None):
@@ -67,7 +67,7 @@ class NotFoundError(SozoException):
         )
 
 
-class ConflictError(SozoException):
+class ConflictError(NeurowellnessException):
     """Resource conflict - 409."""
     
     def __init__(self, message: str, details: Optional[dict] = None):
@@ -79,7 +79,7 @@ class ConflictError(SozoException):
         )
 
 
-class IntegrityError(SozoException):
+class IntegrityError(NeurowellnessException):
     """Data integrity violation."""
     
     def __init__(self, message: str, details: Optional[dict] = None):
@@ -91,7 +91,7 @@ class IntegrityError(SozoException):
         )
 
 
-class InvalidStateTransition(SozoException):
+class InvalidStateTransition(NeurowellnessException):
     """Invalid workflow state transition."""
     
     def __init__(
@@ -113,7 +113,7 @@ class InvalidStateTransition(SozoException):
         )
 
 
-class DomainError(SozoException):
+class DomainError(NeurowellnessException):
     """Domain logic error."""
     
     def __init__(self, message: str, details: Optional[dict] = None):
@@ -125,7 +125,7 @@ class DomainError(SozoException):
         )
 
 
-class ExternalServiceError(SozoException):
+class ExternalServiceError(NeurowellnessException):
     """External service integration error."""
     
     def __init__(self, service: str, message: str, details: Optional[dict] = None):

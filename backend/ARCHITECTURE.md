@@ -1,5 +1,5 @@
 """Detailed architecture and design decisions."""
-# Sozo Architecture Documentation
+# Neurowellness Architecture Documentation
 
 ## Table of Contents
 1. [System Overview](#system-overview)
@@ -11,7 +11,7 @@
 ## System Overview
 
 ### Purpose
-Sozo is a healthcare platform designed to:
+Neurowellness is a healthcare platform designed to:
 - Streamline patient intake and assessment
 - Calculate risk scores using evidence-based algorithms
 - Route patients to appropriate care centers

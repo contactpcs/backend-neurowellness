@@ -1,10 +1,10 @@
-# Sozo Healthcare Platform
+# Neurowellness Healthcare Platform
 
 A production-grade healthcare SaaS platform built with clean architecture principles, enabling comprehensive patient management, intelligent risk assessment, and HIPAA-compliant workflows.
 
 ## 📋 Overview
 
-Sozo is a complete healthcare platform designed to streamline patient care through intelligent automation and comprehensive data management. The platform handles the entire patient journey from initial intake through clinical assessment, risk scoring, and intelligent routing to appropriate care facilities.
+Neurowellness is a complete healthcare platform designed to streamline patient care through intelligent automation and comprehensive data management. The platform handles the entire patient journey from initial intake through clinical assessment, risk scoring, and intelligent routing to appropriate care facilities.
 
 **Key Capabilities:**
 - Patient intake and registration with role-based access control
@@ -136,7 +136,7 @@ The platform uses Supabase (PostgreSQL) with the following core tables:
 1. **Clone the repository:**
    ```bash
    git clone <repository-url>
-   cd Sozo/backend
+   cd Neurowellness/backend
    ```
 
 2. **Create virtual environment:**

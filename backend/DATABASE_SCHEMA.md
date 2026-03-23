@@ -1,5 +1,5 @@
 """Database schema and data model documentation."""
-# Sozo Data Models & Database Schema
+# Neurowellness Data Models & Database Schema
 
 ## Database Design Principles
 

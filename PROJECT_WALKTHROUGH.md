@@ -1,10 +1,10 @@
-# Complete Project Walkthrough - Sozo Healthcare Platform
+# Complete Project Walkthrough - Neurowellness Healthcare Platform
 
 ## 📋 Project Overview
-**Project Name:** Sozo Healthcare Platform  
+**Project Name:** Neurowellness Healthcare Platform  
 **Tech Stack:** FastAPI (Backend) + Vanilla JavaScript (Frontend) + Supabase (PostgreSQL Database)  
-**Location:** `C:\Users\mohan\OneDrive\Desktop\Sozo`  
-**Python Environment:** Virtual environment at `C:\Users\mohan\OneDrive\Desktop\Sozo\venv`
+**Location:** `C:\Users\mohan\OneDrive\Desktop\Neurowellness`  
+**Python Environment:** Virtual environment at `C:\Users\mohan\OneDrive\Desktop\Neurowellness\venv`
 
 ---
 
@@ -28,7 +28,7 @@
 ## 📁 Project Structure
 
 ```
-Sozo/
+Neurowellness/
 ├── backend/
 │   ├── venv/                           # Python virtual environment
 │   ├── app/
@@ -402,7 +402,7 @@ pydantic-settings==2.1.0
 ### **Backend Startup:**
 ```bash
 # Navigate to backend
-cd C:\Users\mohan\OneDrive\Desktop\Sozo\backend
+cd C:\Users\mohan\OneDrive\Desktop\Neurowellness\backend
 
 # Activate virtual environment
 venv\Scripts\activate
@@ -622,4 +622,4 @@ INSERT INTO role_permissions (role_permission_id, role_id, permission_id) VALUES
 
 ---
 
-**This document serves as the complete reference for the current state of the Sozo platform. Use it to continue development without breaking existing functionality.**
+**This document serves as the complete reference for the current state of the Neurowellness platform. Use it to continue development without breaking existing functionality.**
