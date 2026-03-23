@@ -695,13 +695,18 @@ async def login(credentials: LoginRequest):
         
         # Prepare user data for response
         user_response_data = {
-            "user_id": user_id,
-            "email": user_data.get("email"),
-            "first_name": user_data.get("first_name"),
-            "last_name": user_data.get("last_name"),
-            "role": user_role,
-            "is_active": user_data.get("is_active", True),
+            "id": user_id,
+            "email": user_data.get("email") or credentials.email,
+            "first_name": user_data.get("first_name") or "",
+            "last_name": user_data.get("last_name") or "",
+            "roles": [user_role],
+            "permissions": permissions,
         }
+        
+        # Validate user data has required fields
+        if not user_response_data.get("email"):
+            logger.error("Missing email in user response data")
+            raise HTTPException(status_code=500, detail="Invalid user data")
         
         logger.info(f"User login successful: {credentials.email}")
         logger.info(f"User response data: {user_response_data}")
@@ -709,11 +714,12 @@ async def login(credentials: LoginRequest):
         response = TokenResponse(
             access_token=access_token,
             refresh_token=refresh_token,
+            token_type="bearer",
             expires_in=3600,
             user=user_response_data
         )
         
-        logger.info(f"TokenResponse dict: {response.model_dump()}")
+        logger.info(f"TokenResponse data: {response.model_dump()}")
         
         return response
     except HTTPException:
