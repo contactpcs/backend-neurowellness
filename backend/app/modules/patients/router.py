@@ -61,7 +61,7 @@ async def search_patients(
         )
 
 
-@router.get("/me/profile", response_model=PatientDetailResponse)
+@router.get("/login/profile", response_model=PatientDetailResponse)
 async def get_my_profile(
     current_user: JWTClaims = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
